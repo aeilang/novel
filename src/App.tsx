@@ -2,6 +2,8 @@ import { RouterProvider } from "react-router-dom";
 
 import ThemeProvider from "./lib/theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 import { AuthProvider } from "./lib/auth";
 import { router } from "./router";
 
@@ -13,6 +15,7 @@ export default function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
+          <ReactQueryDevtools />
         </QueryClientProvider>
       </AuthProvider>
     </ThemeProvider>

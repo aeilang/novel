@@ -111,9 +111,12 @@ export default function Login() {
             )}
           </Button>
 
-          <div>
-            <Link to={"/signup"} className=" text-sm text-sky-500">
+          <div className="flex justify-between">
+            <Link to="/signup" className=" text-sm text-sky-500">
               还有没账号? 去注册
+            </Link>
+            <Link to="/forget" className="text-sm text-sky-500">
+              忘记密码?
             </Link>
           </div>
         </form>

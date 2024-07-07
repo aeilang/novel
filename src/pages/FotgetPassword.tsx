@@ -11,19 +11,18 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Loader, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+import z from "zod";
 
-const formShema = z
+const Schema = z
   .object({
-    username: z.string().min(2).max(20),
     email: z.string().email(),
-    password: z.string().min(5).max(20),
-    confirmPassword: z.string(),
     verifi_code: z.string().length(4),
+    password: z.string().min(6),
+    confirmPassword: z.string().min(6),
   })
   .refine(
     (data) => {
@@ -35,44 +34,43 @@ const formShema = z
     }
   );
 
-type SignupPayload = z.infer<typeof formShema>;
+type ForgetPayload = z.infer<typeof Schema>;
 
-export default function Signup() {
+export default function ForgetPassword() {
   const [count, setCount] = useState(60);
 
-  const form = useForm<SignupPayload>({
-    resolver: zodResolver(formShema),
+  const form = useForm<ForgetPayload>({
+    resolver: zodResolver(Schema),
     defaultValues: {
-      username: "",
       email: "",
+      verifi_code: "",
       password: "",
       confirmPassword: "",
-      verifi_code: "",
     },
   });
 
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: (formData: SignupPayload) => {
-      return api.post("/register", {
-        username: formData.username,
+    mutationFn: (formData: ForgetPayload) => {
+      return api.post("/forget", {
         email: formData.email,
-        password: formData.password,
+        new_password: formData.password,
         verifi_code: formData.verifi_code,
       });
     },
+
     onSuccess: () => {
       navigate("/login");
     },
   });
 
-  const onSubmit = (formData: SignupPayload) => {
+  const onSubmit = (formData: ForgetPayload) => {
     mutation.mutate(formData);
   };
 
   const sendCodeMuta = useMutation({
-    mutationFn: (formData: Pick<SignupPayload, "email">) => {
+    mutationFn: (formData: Pick<ForgetPayload, "email">) => {
       return api.post("/verify", {
         email: formData.email,
       });
@@ -107,31 +105,7 @@ export default function Signup() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col space-y-5 shadow-md p-8"
           >
-            <h3 className=" text-3xl font-bold text-center">注册</h3>
-            {mutation.isError && (
-              <p
-                onClick={() => {
-                  mutation.reset();
-                }}
-                className=" text-sm text-red-500"
-              >
-                {mutation.error.message} 请重试
-              </p>
-            )}
-
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>用户名</FormLabel>
-                  <FormControl>
-                    <Input type="text" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <h3 className=" text-3xl font-bold text-center">更改密码</h3>
 
             <FormField
               control={form.control}
@@ -210,17 +184,13 @@ export default function Signup() {
               )}
             />
 
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button disabled={mutation.isPending}>
               {mutation.isPending ? (
-                <Loader className=" animate-spin" />
+                <Loader2 className=" animate-spin" />
               ) : (
-                <p>注册</p>
+                <p>更改</p>
               )}
             </Button>
-
-            <Link to={"/login"} className=" text-sm text-sky-500">
-              已有账号，去登录
-            </Link>
           </form>
         </Form>
       </main>

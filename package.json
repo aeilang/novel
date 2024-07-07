@@ -14,6 +14,7 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@tanstack/react-query": "^5.45.1",
+    "@tanstack/react-query-devtools": "^5.50.1",
     "@tiptap/extension-character-count": "^2.4.0",
     "@tiptap/extension-placeholder": "^2.4.0",
     "@tiptap/extension-text-align": "^2.4.0",
