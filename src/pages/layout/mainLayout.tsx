@@ -1,10 +1,11 @@
 import Theme from "@/components/theme/theme";
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/store/auth-store";
+
 import { Edit, LogIn, LogOut, Youtube } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 
 export default function MainLayout() {
-  const { isAuth, setUser, user } = useAuth();
+  const { isAuth, logout, email, role } = useAuth();
 
   return (
     <div className="flex flex-col h-screen">
@@ -16,11 +17,7 @@ export default function MainLayout() {
         </div>
         <div className="flex space-x-5 space-y-0 items-center mr-10">
           {isAuth ? (
-            <button
-              onClick={() => {
-                setUser(null);
-              }}
-            >
+            <button onClick={logout}>
               <LogOut />
             </button>
           ) : (
@@ -32,7 +29,11 @@ export default function MainLayout() {
             <Edit />
           </Link>
 
-          {isAuth && <p>{user?.userId}</p>}
+          {isAuth && (
+            <p>
+              {email} {role}
+            </p>
+          )}
 
           <Theme />
         </div>

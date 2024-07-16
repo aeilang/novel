@@ -1,4 +1,4 @@
-import { useAuth } from "@/lib/auth";
+import { useAuth } from "@/store/auth-store";
 import React from "react";
 import { Navigate } from "react-router-dom";
 

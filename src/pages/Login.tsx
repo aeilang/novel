@@ -8,8 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { User, useAuth } from "@/lib/auth";
 import { api } from "@/lib/axios";
+import { useAuth } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Loader } from "lucide-react";
@@ -24,7 +24,7 @@ const formSchma = z.object({
 
 type LoginPayload = z.infer<typeof formSchma>;
 
-export default function Login() {
+export function Login() {
   const form = useForm<LoginPayload>({
     resolver: zodResolver(formSchma),
     defaultValues: {
@@ -33,7 +33,7 @@ export default function Login() {
     },
   });
 
-  const { setUser } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const mutation = useMutation({
@@ -41,12 +41,10 @@ export default function Login() {
       return api.post("/login", formData).then((resp) => resp.data);
     },
     onSuccess: (data) => {
-      const user: User = {
-        userId: data.user_id,
-        role: data.role,
-        token: data.token,
-      };
-      setUser(user);
+      login({
+        accessToken: data?.access_token,
+        refreshToken: data?.refresh_token,
+      });
       navigate("/", { replace: true });
     },
   });

@@ -36,7 +36,7 @@ const Schema = z
 
 type ForgetPayload = z.infer<typeof Schema>;
 
-export default function ForgetPassword() {
+export function ForgetPassword() {
   const [count, setCount] = useState(60);
 
   const form = useForm<ForgetPayload>({
@@ -75,17 +75,18 @@ export default function ForgetPassword() {
         email: formData.email,
       });
     },
-    onSuccess: () => {
-      const timer = setInterval(() => {
-        setCount((prev) => prev - 1);
-      }, 1000);
-
-      setTimeout(() => {
-        clearInterval(timer);
-        setCount(60);
-      }, 60 * 1000);
-    },
   });
+
+  const startCount = () => {
+    const timer = setInterval(() => {
+      setCount((prev) => prev - 1);
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      setCount(60);
+    }, 60 * 1000);
+  };
 
   const handleSendCode = async () => {
     const output = await form.trigger("email", { shouldFocus: true });
@@ -93,6 +94,7 @@ export default function ForgetPassword() {
     if (!output) {
       return;
     }
+    startCount();
     const email = form.getValues("email");
     sendCodeMuta.mutate({ email: email });
   };
@@ -155,29 +157,27 @@ export default function ForgetPassword() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>验证码</FormLabel>
-                  <div className="flex">
+                  <div className="relative">
                     <FormControl>
                       <Input type="text" {...field} />
                     </FormControl>
-                    {count === 60 ? (
-                      <Button
-                        type="button"
-                        variant="link"
-                        className=" text-sky-500"
-                        onClick={handleSendCode}
-                        disabled={sendCodeMuta.isPending}
-                      >
-                        {sendCodeMuta.isPending ? (
-                          <Loader2 className=" animate-spin w-10" />
-                        ) : (
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                      {count === 60 ? (
+                        <Button
+                          type="button"
+                          variant="link"
+                          className=" text-sky-500"
+                          onClick={handleSendCode}
+                          disabled={sendCodeMuta.isPending}
+                        >
                           <p>发送验证码</p>
-                        )}
-                      </Button>
-                    ) : (
-                      <p className="flex ml-10 mr-2 w-10 items-center">
-                        {count} s
-                      </p>
-                    )}
+                        </Button>
+                      ) : (
+                        <p className="flex ml-10 mr-2 w-10 items-center">
+                          {count} s
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <FormMessage />
                 </FormItem>

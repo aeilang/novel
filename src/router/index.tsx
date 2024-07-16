@@ -1,12 +1,10 @@
 import Protected from "@/components/protected/protected";
-import ForgetPassword from "@/pages/FotgetPassword";
-import Home from "@/pages/Home";
-import Login from "@/pages/Login";
-import Signup from "@/pages/Signup";
-import Tiptap from "@/pages/Tiptap";
 import MainLayout from "@/pages/layout/mainLayout";
-import Viewer from "@/pages/viewer";
+import UserInfo from "@/pages/userInfo";
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
+
+const TipTap = lazy(() => import("@/pages/Tiptap"));
 
 export const router = createBrowserRouter([
   {
@@ -15,26 +13,42 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home />,
+        lazy: async () => {
+          const { Home } = await import("@/pages/Home");
+          return { Component: Home };
+        },
       },
     ],
   },
   {
     path: "/login",
-    element: <Login />,
+    lazy: async () => {
+      const { Login } = await import("@/pages/Login");
+      return { Component: Login };
+    },
   },
   {
     path: "/signup",
-    element: <Signup />,
+    lazy: async () => {
+      const { Signup } = await import("@/pages/Signup");
+      return { Component: Signup };
+    },
   },
   {
     path: "/forget",
-    element: <ForgetPassword />,
+    lazy: async () => {
+      const { ForgetPassword } = await import("@/pages/FotgetPassword");
+      return { Component: ForgetPassword };
+    },
   },
   {
     path: "/view/:novelId",
-    element: <Viewer />,
+    lazy: async () => {
+      const { Viewer } = await import("@/pages/viewer");
+      return { Component: Viewer };
+    },
   },
+
   {
     path: "/protected",
     element: (
@@ -49,7 +63,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "edit",
-        element: <Tiptap />,
+        element: <TipTap />,
+      },
+      {
+        path: "userinfo",
+        element: <UserInfo />,
       },
     ],
   },

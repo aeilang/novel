@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/axios";
+import { useAuth } from "@/store/auth-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Loader, Loader2 } from "lucide-react";
@@ -37,8 +38,10 @@ const formShema = z
 
 type SignupPayload = z.infer<typeof formShema>;
 
-export default function Signup() {
+export function Signup() {
   const [count, setCount] = useState(60);
+
+  const { login } = useAuth();
 
   const form = useForm<SignupPayload>({
     resolver: zodResolver(formShema),
@@ -55,15 +58,21 @@ export default function Signup() {
 
   const mutation = useMutation({
     mutationFn: (formData: SignupPayload) => {
-      return api.post("/register", {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        verifi_code: formData.verifi_code,
-      });
+      return api
+        .post("/register", {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          verifi_code: formData.verifi_code,
+        })
+        .then((res) => res.data);
     },
-    onSuccess: () => {
-      navigate("/login");
+    onSuccess: (data) => {
+      login({
+        accessToken: data?.access_token,
+        refreshToken: data?.refresh_token,
+      });
+      navigate("/", { replace: true });
     },
   });
 
@@ -77,17 +86,18 @@ export default function Signup() {
         email: formData.email,
       });
     },
-    onSuccess: () => {
-      const timer = setInterval(() => {
-        setCount((prev) => prev - 1);
-      }, 1000);
-
-      setTimeout(() => {
-        clearInterval(timer);
-        setCount(60);
-      }, 60 * 1000);
-    },
   });
+
+  const startCount = () => {
+    const timer = setInterval(() => {
+      setCount((prev) => prev - 1);
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      setCount(60);
+    }, 60 * 1000);
+  };
 
   const handleSendCode = async () => {
     const output = await form.trigger("email", { shouldFocus: true });
@@ -95,6 +105,8 @@ export default function Signup() {
     if (!output) {
       return;
     }
+
+    startCount();
     const email = form.getValues("email");
     sendCodeMuta.mutate({ email: email });
   };
@@ -108,16 +120,6 @@ export default function Signup() {
             className="flex flex-col space-y-5 shadow-md p-8"
           >
             <h3 className=" text-3xl font-bold text-center">注册</h3>
-            {mutation.isError && (
-              <p
-                onClick={() => {
-                  mutation.reset();
-                }}
-                className=" text-sm text-red-500"
-              >
-                {mutation.error.message} 请重试
-              </p>
-            )}
 
             <FormField
               control={form.control}
@@ -181,29 +183,27 @@ export default function Signup() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>验证码</FormLabel>
-                  <div className="flex">
+                  <div className="relative">
                     <FormControl>
                       <Input type="text" {...field} />
                     </FormControl>
-                    {count === 60 ? (
-                      <Button
-                        type="button"
-                        variant="link"
-                        className=" text-sky-500"
-                        onClick={handleSendCode}
-                        disabled={sendCodeMuta.isPending}
-                      >
-                        {sendCodeMuta.isPending ? (
-                          <Loader2 className=" animate-spin w-10" />
-                        ) : (
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground">
+                      {count === 60 ? (
+                        <Button
+                          type="button"
+                          variant="link"
+                          className=" text-sky-500"
+                          onClick={handleSendCode}
+                          disabled={sendCodeMuta.isPending}
+                        >
                           <p>发送验证码</p>
-                        )}
-                      </Button>
-                    ) : (
-                      <p className="flex ml-10 mr-2 w-10 items-center">
-                        {count} s
-                      </p>
-                    )}
+                        </Button>
+                      ) : (
+                        <p className="flex ml-10 mr-2 w-10 items-center">
+                          {count} s
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <FormMessage />
                 </FormItem>

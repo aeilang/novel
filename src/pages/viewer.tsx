@@ -2,7 +2,7 @@ import { api } from "@/lib/axios";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
-export default function Viewer() {
+export function Viewer() {
   const { novelId } = useParams();
 
   const { data, isPending, isError, error } = useQuery({
